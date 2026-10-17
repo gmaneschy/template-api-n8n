@@ -88,7 +88,7 @@ services:
       # Cifra as credenciais guardadas. Se for perdida, as credenciais salvas ficam inúteis.
       N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?rode `make env` para gerar o .env}
       N8N_EDITOR_BASE_URL: ${N8N_URL:-http://localhost:5678}
-      WEBHOOK_URL: ${N8N_URL:-http://localhost:5678}/
+      N8N_WEBHOOK_URL: ${N8N_URL:-http://localhost:5678}/
       N8N_PROXY_HOPS: "1"
       N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE:-false}
       N8N_DIAGNOSTICS_ENABLED: "false"
