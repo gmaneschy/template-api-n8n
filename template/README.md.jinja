@@ -7,31 +7,59 @@ Gerado a partir do template `template-api-n8n` (Copier).
 ## Requisitos
 
 - Python {{ python_version }}+ e [uv](https://docs.astral.sh/uv/)
-- PostgreSQL{% if use_pgvector %} com a extensão pgvector{% endif %} (o Compose chega no passo 3 do template)
+- Docker com Compose
 
-## Começando
+## Começando (local)
 
 ```bash
-cp .env.example .env     # preencha API_KEY
+make env        # cria o .env com segredos aleatórios
 make install
-make migrate             # precisa de um Postgres acessível em DATABASE_URL
+make up         # sobe o banco{% if use_n8n %} e o n8n{% endif %} em segundo plano
+make migrate
 make test
-make dev                 # http://localhost:8000/saude
+make dev        # http://localhost:8000/saude
 ```
+{%- if use_n8n %}
+
+O n8n fica em http://localhost:5678. Ele usa um database próprio (`n8n`) no mesmo Postgres da
+aplicação. Esse database é criado automaticamente na primeira subida do banco. Se o volume do
+banco já existia antes de você ligar o n8n, rode `make n8n-db`.
+{%- endif %}
+
+## Profiles do Compose
+
+O `COMPOSE_PROFILES` do `.env` escolhe o que sobe junto com o banco (que sobe sempre):
+
+| profile | serviço |
+|---------|---------|
+| `app` | a API em contêiner (aplica as migrações ao iniciar) |
+| `proxy` | Caddy, com HTTPS automático |
+{%- if use_n8n %}
+| `n8n` | n8n |
+{%- endif %}
+{%- if use_redis %}
+| `redis` | Redis |
+{%- endif %}
+{%- if use_local_llm %}
+| `llm` | Ollama (modelo local, sem GPU) |
+{%- endif %}
+
+No servidor, use `COMPOSE_PROFILES=app,proxy{% if use_n8n %},n8n{% endif %}`, `APP_ENV=production`,
+`DOMAIN` com o seu domínio{% if use_n8n %} e `N8N_URL=https://n8n.SEU-DOMINIO`, `N8N_SECURE_COOKIE=true`{% endif %}.
+Só o Caddy publica portas (80 e 443); banco{% if use_n8n %} e n8n{% endif %} ficam presos em 127.0.0.1.
 
 ## Estrutura
 
 ```
-app/
-  main.py            # criação da aplicação, middleware de log por requisição
-  config.py          # configuração validada na subida
-  db.py              # engine, sessão e verificação de saúde
-  security.py        # chave de acesso (X-API-Key)
-  logging_config.py  # logs em JSON
-  routers/           # rotas
-  services/          # regras de negócio
+app/                 # API (main, config, db, security, logs, routers, services)
 migrations/          # Alembic
 tests/
+infra/
+  caddy/Caddyfile    # proxy reverso e HTTPS
+  postgres/init/     # scripts da primeira subida do banco
+scripts/gen_env.py   # gera o .env
+compose.yaml
+Dockerfile
 ```
 
 ## Atualizando a partir do template

@@ -9,8 +9,10 @@ _message_after_copy: |
 
   Próximos passos:
     cd {{ _copier_conf.dst_path }}
-    cp .env.example .env     # e preencha API_KEY
+    make env                 # cria o .env com segredos aleatórios
     make install
+    make up                  # banco (e n8n) no Docker
+    make migrate
     make test
     make dev                 # http://localhost:8000/saude
 
