@@ -1,0 +1,28 @@
+"""extensões do banco
+
+Revision ID: 0001
+Revises:
+Create Date: 2026-10-16
+"""
+
+{% if use_pgvector -%}
+from alembic import op
+
+{% endif -%}
+revision = "0001"
+down_revision = None
+branch_labels = None
+depends_on = None
+
+
+def upgrade() -> None:
+{%- if use_pgvector %}
+    op.execute("CREATE EXTENSION IF NOT EXISTS vector")
+{%- else %}
+    pass
+{%- endif %}
+
+
+def downgrade() -> None:
+    # As extensões ficam: removê-las apagaria colunas que dependem delas.
+    pass

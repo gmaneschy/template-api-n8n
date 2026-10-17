@@ -1,0 +1,41 @@
+# {{ project_name }}
+
+{{ description }}
+
+Gerado a partir do template `template-api-n8n` (Copier).
+
+## Requisitos
+
+- Python {{ python_version }}+ e [uv](https://docs.astral.sh/uv/)
+- PostgreSQL{% if use_pgvector %} com a extensão pgvector{% endif %} (o Compose chega no passo 3 do template)
+
+## Começando
+
+```bash
+cp .env.example .env     # preencha API_KEY
+make install
+make migrate             # precisa de um Postgres acessível em DATABASE_URL
+make test
+make dev                 # http://localhost:8000/saude
+```
+
+## Estrutura
+
+```
+app/
+  main.py            # criação da aplicação, middleware de log por requisição
+  config.py          # configuração validada na subida
+  db.py              # engine, sessão e verificação de saúde
+  security.py        # chave de acesso (X-API-Key)
+  logging_config.py  # logs em JSON
+  routers/           # rotas
+  services/          # regras de negócio
+migrations/          # Alembic
+tests/
+```
+
+## Atualizando a partir do template
+
+```bash
+copier update
+```

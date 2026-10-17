@@ -1,0 +1,67 @@
+# Configuração do template Copier: perguntas, destino e tarefas pós-geração.
+_min_copier_version: "9.0.0"
+_subdirectory: template
+_templates_suffix: .jinja
+_answers_file: .copier-answers.yml
+
+_message_after_copy: |
+  Projeto "{{ project_name }}" criado em {{ _copier_conf.dst_path }}.
+
+  Próximos passos:
+    cd {{ _copier_conf.dst_path }}
+    cp .env.example .env     # e preencha API_KEY
+    make install
+    make test
+    make dev                 # http://localhost:8000/saude
+
+_tasks:
+  - command: git init -b main
+    when: "{{ _copier_operation == 'copy' }}"
+  - command: uv lock
+
+project_name:
+  type: str
+  help: Nome do projeto (legível)
+  placeholder: RAG com ingestão de documentos
+
+project_slug:
+  type: str
+  help: Identificador do projeto (minúsculas, números e hífen)
+  default: "{{ project_name | lower | replace(' ', '-') }}"
+  validator: >-
+    {% if not (project_slug | regex_search('^[a-z][a-z0-9-]*$')) %}
+    Use apenas minúsculas, números e hífen, começando por uma letra.
+    {% endif %}
+
+description:
+  type: str
+  help: Descrição curta (vai para o pyproject e o README)
+  default: API FastAPI
+
+python_version:
+  type: str
+  help: Versão do Python
+  choices:
+    - "3.12"
+    - "3.13"
+  default: "3.12"
+
+use_pgvector:
+  type: bool
+  help: O projeto usa pgvector (busca vetorial no Postgres)?
+  default: true
+
+use_n8n:
+  type: bool
+  help: Incluir o n8n (profile do Docker Compose)?
+  default: true
+
+use_redis:
+  type: bool
+  help: Incluir Redis (cache e filas)?
+  default: false
+
+use_local_llm:
+  type: bool
+  help: Incluir profile de modelo local (Ollama) no Compose?
+  default: false
