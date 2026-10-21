@@ -18,7 +18,7 @@ Para trazer melhorias do template a projetos já criados: `copier update`.
 - [x] Passo 2: núcleo FastAPI (config validada, banco, logs JSON, chave de acesso, `/saude`, Alembic, testes)
 - [x] Passo 3: Docker Compose com profiles (app, proxy, n8n, redis, llm), Dockerfile, Caddy, `make env`
 - [x] Passo 4: n8n versionado (fluxo de exemplo em `n8n/workflows/`, `scripts/n8n.py` para exportar e importar, funciona sem `make`)
-- [ ] Passo 5: CI (ruff, pytest com Postgres, build da imagem)
+- [x] Passo 5: CI no GitHub Actions: nos projetos gerados (lint, testes com Postgres, Compose, imagem arm64) e no próprio template (gera variantes e testa)
 - [ ] Passo 6: deploy na Oracle Cloud (arm64)
 
 ## Testando o próprio template

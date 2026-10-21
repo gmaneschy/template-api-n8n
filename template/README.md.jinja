@@ -106,6 +106,13 @@ compose.yaml
 Dockerfile
 ```
 
+## CI
+
+`.github/workflows/ci.yml` roda a cada push na `main` e em pull requests, em três jobs: lint e testes
+(com um Postgres de verdade e as migrações), Compose com a imagem da API em amd64, e build da imagem
+em arm64 (a arquitetura da instância gratuita da Oracle). O Dependabot avisa quando as actions
+ficam desatualizadas.
+
 ## Atualizando a partir do template
 
 ```bash

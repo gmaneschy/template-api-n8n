@@ -1,0 +1,57 @@
+name: Template
+
+# Gera projetos a partir do template e roda os testes e o lint deles.
+# Pega quebras como um arquivo .jinja com erro ou uma opção do Copier que gera código inválido.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: template-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gerar-e-testar:
+    name: ${{ matrix.nome }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - nome: padrão
+            opcoes: ""
+          - nome: sem n8n e pgvector, com redis e llm
+            opcoes: >-
+              --data python_version=3.13
+              --data use_pgvector=false
+              --data use_n8n=false
+              --data use_redis=true
+              --data use_local_llm=true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: Gerar o projeto
+        run: >-
+          uvx copier copy --trust --defaults
+          --data project_name="Projeto de Teste"
+          ${{ matrix.opcoes }}
+          . "$RUNNER_TEMP/projeto"
+      - name: Lint
+        working-directory: ${{ runner.temp }}/projeto
+        run: |
+          uv sync
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Testes
+        working-directory: ${{ runner.temp }}/projeto
+        run: uv run pytest -q
+      - name: Validar o compose.yaml
+        working-directory: ${{ runner.temp }}/projeto
+        run: |
+          python3 scripts/gen_env.py
+          docker compose --profile "*" config --quiet
